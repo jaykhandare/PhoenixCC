@@ -13,9 +13,8 @@ class UserForm(UserCreationForm):
     pin_code = forms.CharField(max_length=6)
     address = forms.CharField()
     city = forms.CharField()
-    date_of_joining = forms.DateField()
 
     class Meta:
         model = User
         fields = ('first_name', 'last_name', 'email', 'password1', 'password2',
-                  'date_of_birth', 'pin_code', 'address', 'city', 'date_of_joining')
+                  'date_of_birth', 'pin_code', 'address', 'city')
