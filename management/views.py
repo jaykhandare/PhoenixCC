@@ -1,10 +1,11 @@
-from django.http.response import HttpResponse
+from django.forms import fields
+from django.http.response import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render
 from django.contrib.auth.models import User
 
 from users.models import Personal_Info
-from management.forms import UserData_MngtForm
-
+from management.forms import UserData_update_form
+import django_tables2 as tables
 
 def assign_user_details(request):
     if request.method == "POST":
@@ -31,13 +32,21 @@ def assign_user_details(request):
         user_details_obj = Personal_Info.objects.get(username=username)
         user_details_context = {'username': user_details_obj.username, 'date_of_joining': user_details_obj.date_of_joining, 'position': user_details_obj.position,
                                 'direct_manager': user_details_obj.direct_manager, 'level': user_details_obj.level, 'old_username': user_details_obj.username}
-        form = UserData_MngtForm(user_data=user_details_context)
-
+        form = UserData_update_form(user_data=user_details_context)
         return render(request, "user_details_modif.html", {'form': form})
 
+class UserTable(tables.Table):
+    class Meta:
+        model = Personal_Info
 
 def show_all_users(request):
-    pass
+    if request.method == "GET":
+        all_users = Personal_Info.objects.all()
+        table = UserTable(all_users)
+        return render(request, 'user_list.html', {'table': table})
+    
+    elif request.method == "POST":
+        return HttpResponseBadRequest()
 
 
 def view_customer_info(request):

@@ -3,8 +3,7 @@
 from django import forms
 from django.forms.widgets import HiddenInput
 
-
-class UserData_MngtForm(forms.Form):
+class UserData_update_form(forms.Form):
     old_username = forms.CharField(max_length=20, widget=HiddenInput)
     username = forms.CharField(max_length=20)
     date_of_joining = forms.DateField()
@@ -13,6 +12,6 @@ class UserData_MngtForm(forms.Form):
     level = forms.IntegerField()
 
     def __init__(self, user_data):
-        super(UserData_MngtForm, self).__init__()
+        super(UserData_update_form, self).__init__()
         for item in self.fields.keys():
             self.fields[item].initial = user_data[item]
