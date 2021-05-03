@@ -3,6 +3,7 @@
 from django.http.response import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render
 from random import randint
+from datetime import date
 
 from users.forms import UserForm
 from users.models import UserDetails
@@ -30,7 +31,7 @@ def register(request):
                 else:
                     user_details_obj = UserDetails(username=username, date_of_birth=form.cleaned_data['date_of_birth'], 
                                                    pin_code=form.cleaned_data['pin_code'], address=form.cleaned_data['address'], 
-                                                   city=form.cleaned_data['city'])
+                                                   city=form.cleaned_data['city'], email_verified=False, date_of_joining=date.today(), all_clear_status=False)
                     user_details_obj.save()
                     return HttpResponse("Thanks for the registration. We'll get back to you soon.")
 
@@ -39,3 +40,6 @@ def register(request):
             return HttpResponseBadRequest()
     elif request.method == "GET":
         return render(request, "users/register.html", {"form": UserForm})
+
+def verify_email(request):
+    pass
