@@ -1,13 +1,12 @@
 # users/views.py
 
-from django.http.response import HttpResponse, HttpResponseBadRequest
+from django.http.response import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
 from django.shortcuts import render
 from random import randint
 from datetime import date
 
 from users.forms import UserForm
-from users.models import UserDetails
-
+from users.models import Personal_Info
 
 def dashboard(request):
     return render(request, "users/dashboard.html")
@@ -21,21 +20,20 @@ def register(request):
             user_obj.first_name = user_obj.first_name.capitalize()
             user_obj.last_name = user_obj.last_name.capitalize()
 
-            for _ in range(10):
-                username = str(randint(1, 10000))
-                try:
-                    user_obj.username = username
-                    user_obj.save()
-                except:
-                    pass
-                else:
-                    user_details_obj = UserDetails(username=username, date_of_birth=form.cleaned_data['date_of_birth'], 
-                                                   pin_code=form.cleaned_data['pin_code'], address=form.cleaned_data['address'], 
-                                                   city=form.cleaned_data['city'], email_verified=False, date_of_joining=date.today(), all_clear_status=False)
-                    user_details_obj.save()
-                    return HttpResponse("Thanks for the registration. We'll get back to you soon.")
+            username = user_obj.first_name.lower()[0] + user_obj.last_name.lower() + str(randint(1, 10000))
+            user_obj.username = username
+            user_details_obj = Personal_Info(username=username, date_of_birth=form.cleaned_data['date_of_birth'], 
+                                pin_code=form.cleaned_data['pin_code'], address=form.cleaned_data['address'], 
+                                city=form.cleaned_data['city'], email_verified=False, date_of_joining=date.today())
+            try:
+                user_obj.save()
+                user_details_obj.save()
+                print("{} : {} {} added".format(username, user_obj.first_name, user_obj.last_name))
+            except Exception as e:
+                return HttpResponseServerError()
 
-            return HttpResponse("You are extremely unlucky. Try again.")
+            return HttpResponse("Thanks for the registration. We'll get back to you soon.")
+
         else:
             return HttpResponseBadRequest()
     elif request.method == "GET":
