@@ -1,5 +1,6 @@
-from django.forms import fields
-from django.http.response import HttpResponse, HttpResponseBadRequest
+# management/views.py
+
+from django.http.response import HttpResponseBadRequest
 from django.shortcuts import render
 from django.contrib.auth.models import User
 
@@ -7,13 +8,14 @@ from users.models import Personal_Info
 from management.forms import UserData_update_form
 import django_tables2 as tables
 
+
 def assign_user_details(request):
     if request.method == "POST":
         data_for_update = request.POST.dict()
         old_username = data_for_update['old_username']
-        
+
         # retrieve user and Personal_Info from old_username and update them
-        user_obj = User.objects.get(username=old_username)        
+        user_obj = User.objects.get(username=old_username)
         user_obj.username = data_for_update['username']
         user_obj.save()
 
@@ -24,8 +26,10 @@ def assign_user_details(request):
         user_details_obj.direct_manager = data_for_update['direct_manager']
         user_details_obj.level = data_for_update['level']
         user_details_obj.save()
-        
-        return HttpResponse("Okay")
+
+        # direct return of show_all_users
+        request.method = "GET"
+        return show_all_users(request)
 
     elif request.method == "GET":
         username = request.GET.dict()['username']
@@ -35,19 +39,15 @@ def assign_user_details(request):
         form = UserData_update_form(user_data=user_details_context)
         return render(request, "user_details_modif.html", {'form': form})
 
-class UserTable(tables.Table):
-    class Meta:
-        model = Personal_Info
 
 def show_all_users(request):
+    class User_Info_Table(tables.Table):
+        class Meta:
+            model = Personal_Info
+
     if request.method == "GET":
         all_users = Personal_Info.objects.all()
-        table = UserTable(all_users)
+        table = User_Info_Table(all_users)
         return render(request, 'user_list.html', {'table': table})
-    
     elif request.method == "POST":
         return HttpResponseBadRequest()
-
-
-def view_customer_info(request):
-    pass

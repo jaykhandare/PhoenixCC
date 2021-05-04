@@ -1,7 +1,7 @@
 # users/views.py
 
-from django.http.response import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
-from django.shortcuts import render
+from django.http.response import HttpResponseBadRequest, HttpResponseServerError
+from django.shortcuts import redirect, render
 from random import randint
 from datetime import date
 
@@ -32,12 +32,9 @@ def register(request):
             except Exception as e:
                 return HttpResponseServerError()
 
-            return HttpResponse("Thanks for the registration. We'll get back to you soon.")
-
+            return redirect('dashboard')
+            # ("Thanks for the registration. We'll get back to you soon.")
         else:
             return HttpResponseBadRequest()
     elif request.method == "GET":
         return render(request, "users/register.html", {"form": UserForm})
-
-def verify_email(request):
-    pass
