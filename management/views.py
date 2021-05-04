@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.contrib.auth.models import User
 
 from users.models import Personal_Info
-from management.forms import UserData_update_form
+from management.forms import UserDataUpdateForm
 import django_tables2 as tables
 
 
@@ -36,7 +36,7 @@ def assign_user_details(request):
         user_details_obj = Personal_Info.objects.get(username=username)
         user_details_context = {'username': user_details_obj.username, 'date_of_joining': user_details_obj.date_of_joining, 'position': user_details_obj.position,
                                 'direct_manager': user_details_obj.direct_manager, 'level': user_details_obj.level, 'old_username': user_details_obj.username}
-        form = UserData_update_form(user_data=user_details_context)
+        form = UserDataUpdateForm(user_data=user_details_context)
         return render(request, "user_details_modif.html", {'form': form})
 
 

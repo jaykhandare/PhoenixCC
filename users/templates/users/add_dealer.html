@@ -1,0 +1,15 @@
+<!--users/templates/users/add_dealer.html-->
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Upload dealer details</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {{form}}
+    <input type="submit" value="Upload">
+</form>
+
+<a href="{% url 'dashboard' %}">Dashboard</a>
+{% endblock %}

@@ -5,12 +5,14 @@ from django.shortcuts import redirect, render
 from random import randint
 from datetime import date
 
-from users.forms import UserForm
-from users.models import Personal_Info
+from users.forms import UserForm, DealerInfoForm
+from users.models import Dealer_Info, Personal_Info
 
 def dashboard(request):
-    return render(request, "users/dashboard.html")
-
+    if str(request.user) == "AnonymousUser":
+        return render(request, "users/dashboard.html")
+    else:
+        return HttpResponseServerError()
 
 def register(request):
     if request.method == "POST":
@@ -38,3 +40,20 @@ def register(request):
             return HttpResponseBadRequest()
     elif request.method == "GET":
         return render(request, "users/register.html", {"form": UserForm})
+
+def add_dealer(request):
+    if request.method == "POST":
+        data = request.POST.dict()
+        dealer_obj = Dealer_Info(first_name=data['first_name'], last_name=data['last_name'], pin_code=data['pin_code'], address=data['address'], city=data['city'], managed_by=data['managed_by'], date_of_registration=date.today(), pan_number=data['pan_number'], aadhar_number=data['aadhar_number'], unique_code='NOT_ASSIGNED')
+        try:
+            dealer_obj.save()
+        except Exception as e:
+            print(e)
+            return HttpResponseServerError()
+        else:
+            return redirect('dashboard')
+    elif request.method == "GET":
+        return render(request, "users/add_dealer.html", {"form": DealerInfoForm(username=request.user)})
+
+def upload_user_headshot(request):
+    pass
