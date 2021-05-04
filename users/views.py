@@ -2,6 +2,8 @@
 
 from django.http.response import HttpResponseBadRequest, HttpResponseServerError
 from django.shortcuts import redirect, render
+from django.core.files.storage import FileSystemStorage
+
 from random import randint
 from datetime import date
 
@@ -9,10 +11,7 @@ from users.forms import UserForm, DealerInfoForm
 from users.models import Dealer_Info, Personal_Info
 
 def dashboard(request):
-    if str(request.user) == "AnonymousUser":
         return render(request, "users/dashboard.html")
-    else:
-        return HttpResponseServerError()
 
 def register(request):
     if request.method == "POST":
@@ -26,7 +25,7 @@ def register(request):
             user_obj.username = username
             user_details_obj = Personal_Info(username=username, date_of_birth=form.cleaned_data['date_of_birth'], 
                                 pin_code=form.cleaned_data['pin_code'], address=form.cleaned_data['address'], 
-                                city=form.cleaned_data['city'], email_verified=False, date_of_joining=date.today())
+                                city=form.cleaned_data['city'], email_verified=False)
             try:
                 user_obj.save()
                 user_details_obj.save()
@@ -55,5 +54,28 @@ def add_dealer(request):
     elif request.method == "GET":
         return render(request, "users/add_dealer.html", {"form": DealerInfoForm(username=request.user)})
 
+
 def upload_user_headshot(request):
+    fs = FileSystemStorage()
+    if request.method == "POST" and request.FILES['profile_picture']:
+        file = request.FILES['profile_picture']
+        file_name = './users/' + str(request.user) + '.' + file.name.split('.')[-1]
+
+        if fs.exists(file_name):
+            fs.delete(file_name)
+        filename = fs.save(file_name, file)
+        uploaded_file_url = fs.url(filename)
+        return render(request, 'users/user_headshot_upload.html', {'uploaded_file_url' : uploaded_file_url})
+    
+    elif request.method == "GET":
+        if str(request.user) != "AnonymousUser":
+            file_name = './users/' + str(request.user) + '.png'
+            if fs.exists(file_name):
+                return render(request, 'users/user_headshot_upload.html', {'uploaded_file_url' : fs.url(file_name)})
+        
+        # user is AnonymousUser or doesn't have profilePic
+        file_name = './users/profilePic.png'
+        return render(request, 'users/user_headshot_upload.html', {'uploaded_file_url' : fs.url(file_name)})
+
+def upload_dealer_doc(request):
     pass

@@ -14,7 +14,6 @@ class UserForm(UserCreationForm):
     pin_code = forms.CharField(max_length=6)
     address = forms.CharField()
     city = forms.CharField()
-
     class Meta:
         model = User
         fields = ('first_name', 'last_name', 'email', 'password1', 'password2',
