@@ -61,6 +61,8 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
+            # application level templates
+            'templates/'
             # templates for management app
             'management/templates/',
             # templates for users app

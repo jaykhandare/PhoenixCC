@@ -7,16 +7,17 @@ from django.core.files.storage import FileSystemStorage
 from random import randint
 from datetime import date
 
+import django_tables2 as tables
 from users.forms import UserForm, DealerInfoForm
 from users.models import Dealer_Info, Personal_Info
-import django_tables2 as tables
-
+from common import create_exception
 
 def dashboard(request):
     return render(request, "users/dashboard.html")
 
 def register(request):
-    res = HttpResponseServerError()
+    res = create_exception(request, __name__, exception="unknown request method")
+    
     if request.method == "POST":
         form = UserForm(request.POST)
         if form.is_valid():
@@ -36,18 +37,18 @@ def register(request):
                     username, user_obj.first_name, user_obj.last_name))
             except Exception as e:
                 print(e)
-                res = HttpResponseServerError()
+                res = create_exception(request, __name__, exception=e)
             else:
                 res = redirect('dashboard')
         else:
-            res = HttpResponseBadRequest()
+            res = create_exception(request, __name__, str(ValueError("form data in request not valid")))
     elif request.method == "GET":
         res = render(request, "users/register.html", {"form": UserForm})
 
     return res
 
 def add_dealer(request):
-    res = HttpResponseServerError()
+    res = create_exception(request, __name__, exception="unknown request method")
     if request.method == "POST":
         data = request.POST.dict()
         dealer_obj = Dealer_Info(first_name=data['first_name'], last_name=data['last_name'], pin_code=data['pin_code'], address=data['address'], city=data['city'],
@@ -56,7 +57,7 @@ def add_dealer(request):
             dealer_obj.save()
         except Exception as e:
             print(e)
-            res = HttpResponseServerError()
+            res = create_exception(request, __name__, exception=e)
         else:
             res = redirect('dashboard')
     elif request.method == "GET":
@@ -65,7 +66,7 @@ def add_dealer(request):
     return res
 
 def upload_user_headshot(request):
-    res = HttpResponseServerError()
+    res = create_exception(request, __name__, exception="unknown request method")
     fs = FileSystemStorage()
     if request.method == "POST" and request.FILES['profile_picture']:
         file = request.FILES['profile_picture']
@@ -78,7 +79,7 @@ def upload_user_headshot(request):
             filename = fs.save(file_name, file)
         except Exception as e:
             print(e)
-            res = HttpResponseServerError
+            res = create_exception(request, __name__, exception=e)
         else:
             res = render(request, 'users/user_headshot_upload.html', {'uploaded_file_url': fs.url(filename)})
     elif request.method == "GET":
@@ -93,7 +94,7 @@ def upload_user_headshot(request):
     return res
 
 def get_my_dealers(request):
-    res = HttpResponseServerError()
+    res = create_exception(request, __name__, exception="unknown request method")
     class Dealer_Info_Table(tables.Table):
         class Meta:
             model = Dealer_Info
@@ -104,12 +105,12 @@ def get_my_dealers(request):
         table = Dealer_Info_Table(dealer_objs)
         res = render(request, 'users/dealers_under_user.html', {'table': table})
     elif request.method == "POST":
-        res = HttpResponseBadRequest()
+        res = create_exception(request, __name__, exception="POST method not implemented")
 
     return res
 
 def upload_dealer_docs(request):
-    res = HttpResponseServerError()
+    res = create_exception(request, __name__, exception="unknown request method")
     if request.method == "POST":
         fs = FileSystemStorage()
         dealer_code = request.POST.dict()['dealer_code']
@@ -137,10 +138,10 @@ def upload_dealer_docs(request):
             dealer_obj = Dealer_Info.objects.get(unique_code=unique_code)
         except Exception as e:
             print(e)
-            res = HttpResponseServerError()
+            res = create_exception(request, __name__, exception=e)
         if dealer_obj is not None:
             res = render(request, 'users/add_dealer_docs.html', {'dealer': dealer_obj})
         else:
-            res = HttpResponseServerError()
+            res = create_exception(request, __name__, exception="dealer with unique_code({}) not found".format(unique_code))
 
     return res

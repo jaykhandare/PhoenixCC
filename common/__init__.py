@@ -1,5 +1,8 @@
 # common/__init__.py
 
+from django.shortcuts import render
+
+INTERNAL_ERROR_TEMPLATE = "internal_error.html"
 
 # Singleton implementation for implementing Singleton Design Pattern
 class SingletonMeta(type):
@@ -33,3 +36,7 @@ class UserSpecific(SingletonMeta):
             if UserSpecific.ALLOWED_POSITIONS[index][0] == position_string:
                 return index
         return ValueError("{} : position not defined in the hierarchy. Please define it in common class".format(position_string))
+
+def create_exception(request, function_name, exception, template=INTERNAL_ERROR_TEMPLATE):
+    exception_reply = {'exception' : "problem in {} function: {}".format(function_name, exception) }
+    return render(request, template, exception_reply)

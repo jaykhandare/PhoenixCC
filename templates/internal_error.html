@@ -1,0 +1,24 @@
+<!--templates/internal_error.html-->
+
+<style>
+    label, input {
+        display: block;
+    }
+    span.helptext {
+        display: none;
+    }
+</style>
+
+<h1>Phoenix CC</h1>
+
+{% block content %}
+<p> Internal error occured. </p>
+
+Please contact admin with the following information for resolution.
+Exception:
+{% if exception %}
+{{exception}}
+{% endif %}
+
+
+{% endblock %}
