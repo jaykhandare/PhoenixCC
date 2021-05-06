@@ -37,11 +37,17 @@ def assign_user_details(request):
 
     elif request.method == "GET":
         username = request.GET.dict()['username']
-        user_details_obj = Personal_Info.objects.get(username=username)
-        user_details_context = {'username': user_details_obj.username, 'date_of_joining': user_details_obj.date_of_joining, 'position': user_details_obj.position,
-                                'direct_manager': user_details_obj.direct_manager, 'old_username': user_details_obj.username}
-        form = UserDataUpdateForm(user_data=user_details_context)
-        res = render(request, "user_details_modif.html", {'form': form})
+        user_details_obj = None
+        try:
+            user_details_obj = Personal_Info.objects.get(username=username)
+        except Exception as e:
+            print(e)
+            res = create_exception(request, __name__, exception=e, additional_data=username)
+        else:
+            user_details_context = {'username': user_details_obj.username, 'date_of_joining': user_details_obj.date_of_joining, 'position': user_details_obj.position,
+                                    'direct_manager': user_details_obj.direct_manager, 'old_username': user_details_obj.username}
+            form = UserDataUpdateForm(user_data=user_details_context)
+            res = render(request, "user_details_modif.html", {'form': form})
 
     return res
 

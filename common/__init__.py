@@ -1,5 +1,7 @@
 # common/__init__.py
 
+from django.db import reset_queries
+from django.http import response
 from django.shortcuts import render
 
 INTERNAL_ERROR_TEMPLATE = "internal_error.html"
@@ -37,6 +39,13 @@ class UserSpecific(SingletonMeta):
                 return index
         return ValueError("{} : position not defined in the hierarchy. Please define it in common class".format(position_string))
 
-def create_exception(request, function_name, exception, template=INTERNAL_ERROR_TEMPLATE):
-    exception_reply = {'exception' : "problem in {} function: {}".format(function_name, exception) }
+
+def create_exception(request, function_name, exception, template=INTERNAL_ERROR_TEMPLATE, additional_data=None):
+    response_string = "problem in {} : {} ".format(function_name, exception)
+    if additional_data is not None:
+        response_string += " => for value : {}".format(additional_data)
+    
+    exception_reply = {'exception' : response_string}
+    if additional_data is not None: exception_reply['exception'] + " for value: {}".format(additional_data)
+    print(additional_data)
     return render(request, template, exception_reply)

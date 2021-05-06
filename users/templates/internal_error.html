@@ -1,4 +1,6 @@
-<!--templates/internal_error.html-->
+<!--users/internal_error.html-->
+
+{% extends 'base.html' %}
 
 <style>
     label, input {
@@ -14,8 +16,9 @@
 {% block content %}
 <p> Internal error occured. </p>
 
-Please contact admin with the following information for resolution.
-Exception:
+Please contact admin with the following information for resolution. <br> <br>
+
+<h3>Exception:</h3>
 {% if exception %}
 {{exception}}
 {% endif %}
