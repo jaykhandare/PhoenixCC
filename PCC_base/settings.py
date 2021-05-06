@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     # application specific modifications
     'users',
     'management',
-    
     'django_tables2',
 ]
 
