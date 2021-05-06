@@ -15,8 +15,8 @@ import django_tables2 as tables
 def dashboard(request):
     return render(request, "users/dashboard.html")
 
-
 def register(request):
+    res = HttpResponseServerError()
     if request.method == "POST":
         form = UserForm(request.POST)
         if form.is_valid():
@@ -35,17 +35,19 @@ def register(request):
                 print("{} : {} {} added".format(
                     username, user_obj.first_name, user_obj.last_name))
             except Exception as e:
-                return HttpResponseServerError()
-
-            return redirect('dashboard')
-            # ("Thanks for the registration. We'll get back to you soon.")
+                print(e)
+                res = HttpResponseServerError()
+            else:
+                res = redirect('dashboard')
         else:
-            return HttpResponseBadRequest()
+            res = HttpResponseBadRequest()
     elif request.method == "GET":
-        return render(request, "users/register.html", {"form": UserForm})
+        res = render(request, "users/register.html", {"form": UserForm})
 
+    return res
 
 def add_dealer(request):
+    res = HttpResponseServerError()
     if request.method == "POST":
         data = request.POST.dict()
         dealer_obj = Dealer_Info(first_name=data['first_name'], last_name=data['last_name'], pin_code=data['pin_code'], address=data['address'], city=data['city'],
@@ -54,14 +56,16 @@ def add_dealer(request):
             dealer_obj.save()
         except Exception as e:
             print(e)
-            return HttpResponseServerError()
+            res = HttpResponseServerError()
         else:
-            return redirect('dashboard')
+            res = redirect('dashboard')
     elif request.method == "GET":
-        return render(request, "users/add_dealer.html", {"form": DealerInfoForm(username=request.user)})
+        res = render(request, "users/add_dealer.html", {"form": DealerInfoForm(username=request.user)})
 
+    return res
 
 def upload_user_headshot(request):
+    res = HttpResponseServerError()
     fs = FileSystemStorage()
     if request.method == "POST" and request.FILES['profile_picture']:
         file = request.FILES['profile_picture']
@@ -74,21 +78,22 @@ def upload_user_headshot(request):
             filename = fs.save(file_name, file)
         except Exception as e:
             print(e)
-            return HttpResponseServerError
+            res = HttpResponseServerError
         else:
-            return render(request, 'users/user_headshot_upload.html', {'uploaded_file_url': fs.url(filename)})
-
+            res = render(request, 'users/user_headshot_upload.html', {'uploaded_file_url': fs.url(filename)})
     elif request.method == "GET":
         if str(request.user) != "AnonymousUser":
             file_name = './users/' + str(request.user) + '.png'
             if fs.exists(file_name):
-                return render(request, 'users/user_headshot_upload.html', {'uploaded_file_url': fs.url(file_name)})
-
+                res = render(request, 'users/user_headshot_upload.html', {'uploaded_file_url': fs.url(file_name)})
         # user is AnonymousUser or doesn't have profilePic
         file_name = './users/profilePic.png'
-        return render(request, 'users/user_headshot_upload.html', {'uploaded_file_url': fs.url(file_name)})
+        res = render(request, 'users/user_headshot_upload.html', {'uploaded_file_url': fs.url(file_name)})
+
+    return res
 
 def get_my_dealers(request):
+    res = HttpResponseServerError()
     class Dealer_Info_Table(tables.Table):
         class Meta:
             model = Dealer_Info
@@ -97,14 +102,15 @@ def get_my_dealers(request):
         username = str(request.user)
         dealer_objs = Dealer_Info.objects.filter(managed_by=username)
         table = Dealer_Info_Table(dealer_objs)
-        return render(request, 'users/dealers_under_user.html', {'table': table})
+        res = render(request, 'users/dealers_under_user.html', {'table': table})
     elif request.method == "POST":
-        return HttpResponseBadRequest()
-    
+        res = HttpResponseBadRequest()
+
+    return res
 
 def upload_dealer_docs(request):
+    res = HttpResponseServerError()
     if request.method == "POST":
-
         fs = FileSystemStorage()
         dealer_code = request.POST.dict()['dealer_code']
         aadhar_card = request.FILES['aadhar_card']
@@ -116,13 +122,13 @@ def upload_dealer_docs(request):
 
         if fs.exists(file_name_aadhar_card):
             fs.delete(file_name_aadhar_card)
-        f1 = fs.save(file_name_aadhar_card, aadhar_card)
+        fs.save(file_name_aadhar_card, aadhar_card)
 
         if fs.exists(file_name_pan_card):
             fs.delete(file_name_pan_card)
-        f2 = fs.save(file_name_pan_card, pan_card)
+        fs.save(file_name_pan_card, pan_card)
 
-        return render(request, 'users/dashboard.html')
+        res = render(request, 'users/dashboard.html')
 
     elif request.method == "GET":
         unique_code = request.GET.dict()['unique_code']
@@ -131,8 +137,10 @@ def upload_dealer_docs(request):
             dealer_obj = Dealer_Info.objects.get(unique_code=unique_code)
         except Exception as e:
             print(e)
-            return HttpResponseServerError()
+            res = HttpResponseServerError()
         if dealer_obj is not None:
-            return render(request, 'users/add_dealer_docs.html', {'dealer': dealer_obj})
+            res = render(request, 'users/add_dealer_docs.html', {'dealer': dealer_obj})
         else:
-            return HttpResponseServerError()
+            res = HttpResponseServerError()
+
+    return res
