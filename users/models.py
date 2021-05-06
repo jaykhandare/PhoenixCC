@@ -12,7 +12,6 @@ class Personal_Info(models.Model):
     date_of_joining = models.DateField(auto_now_add=True)
     position = models.CharField(max_length=15)
     direct_manager = models.CharField(max_length=20)
-    level = models.IntegerField(default=-1)
     email_verified = models.BooleanField()
 
 class Dealer_Info(models.Model):
