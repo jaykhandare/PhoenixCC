@@ -1,0 +1,17 @@
+<!--users/templates/users/dealers_under_user.html-->
+
+{% extends 'base.html' %}
+
+<h2>Dealers details</h2>
+{% block content %}
+
+{% load render_table from django_tables2%}
+{% render_table table %}
+<br>
+
+<form method="get" action={% url 'upload_dealer_docs' %} >
+    <lable for="unique_code"> Dealer Unique Code: </lable> <input type="text" id="unique_code" name="unique_code">
+    <input type="submit" value="Retrieve">
+</form>
+
+{% endblock %}

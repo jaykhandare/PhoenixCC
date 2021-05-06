@@ -22,7 +22,7 @@ class Dealer_Info(models.Model):
     address = models.CharField(max_length=30)
     city = models.CharField(max_length=15)
     managed_by = models.CharField(max_length=20)
-    date_of_registration = models.DateField()
+    date_of_registration = models.DateField(auto_now_add=True)
     pan_number = models.CharField(max_length=11)
     aadhar_number = models.CharField(max_length=20)
     unique_code = models.CharField(max_length=15, default="NOT_ASSIGNED")

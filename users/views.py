@@ -9,9 +9,12 @@ from datetime import date
 
 from users.forms import UserForm, DealerInfoForm
 from users.models import Dealer_Info, Personal_Info
+import django_tables2 as tables
+
 
 def dashboard(request):
-        return render(request, "users/dashboard.html")
+    return render(request, "users/dashboard.html")
+
 
 def register(request):
     if request.method == "POST":
@@ -23,13 +26,14 @@ def register(request):
 
             username = user_obj.first_name.lower()[0] + user_obj.last_name.lower() + str(randint(1, 10000))
             user_obj.username = username
-            user_details_obj = Personal_Info(username=username, date_of_birth=form.cleaned_data['date_of_birth'], 
-                                pin_code=form.cleaned_data['pin_code'], address=form.cleaned_data['address'], 
-                                city=form.cleaned_data['city'], email_verified=False)
+            user_details_obj = Personal_Info(username=username, date_of_birth=form.cleaned_data['date_of_birth'],
+                                             pin_code=form.cleaned_data['pin_code'], address=form.cleaned_data['address'],
+                                             city=form.cleaned_data['city'], email_verified=False)
             try:
                 user_obj.save()
                 user_details_obj.save()
-                print("{} : {} {} added".format(username, user_obj.first_name, user_obj.last_name))
+                print("{} : {} {} added".format(
+                    username, user_obj.first_name, user_obj.last_name))
             except Exception as e:
                 return HttpResponseServerError()
 
@@ -40,10 +44,12 @@ def register(request):
     elif request.method == "GET":
         return render(request, "users/register.html", {"form": UserForm})
 
+
 def add_dealer(request):
     if request.method == "POST":
         data = request.POST.dict()
-        dealer_obj = Dealer_Info(first_name=data['first_name'], last_name=data['last_name'], pin_code=data['pin_code'], address=data['address'], city=data['city'], managed_by=data['managed_by'], date_of_registration=date.today(), pan_number=data['pan_number'], aadhar_number=data['aadhar_number'], unique_code='NOT_ASSIGNED')
+        dealer_obj = Dealer_Info(first_name=data['first_name'], last_name=data['last_name'], pin_code=data['pin_code'], address=data['address'], city=data['city'],
+                                 managed_by=data['managed_by'], date_of_registration=date.today(), pan_number=data['pan_number'], aadhar_number=data['aadhar_number'], unique_code='NOT_ASSIGNED')
         try:
             dealer_obj.save()
         except Exception as e:
@@ -63,19 +69,70 @@ def upload_user_headshot(request):
 
         if fs.exists(file_name):
             fs.delete(file_name)
-        filename = fs.save(file_name, file)
-        uploaded_file_url = fs.url(filename)
-        return render(request, 'users/user_headshot_upload.html', {'uploaded_file_url' : uploaded_file_url})
-    
+
+        try:
+            filename = fs.save(file_name, file)
+        except Exception as e:
+            print(e)
+            return HttpResponseServerError
+        else:
+            return render(request, 'users/user_headshot_upload.html', {'uploaded_file_url': fs.url(filename)})
+
     elif request.method == "GET":
         if str(request.user) != "AnonymousUser":
             file_name = './users/' + str(request.user) + '.png'
             if fs.exists(file_name):
-                return render(request, 'users/user_headshot_upload.html', {'uploaded_file_url' : fs.url(file_name)})
-        
+                return render(request, 'users/user_headshot_upload.html', {'uploaded_file_url': fs.url(file_name)})
+
         # user is AnonymousUser or doesn't have profilePic
         file_name = './users/profilePic.png'
-        return render(request, 'users/user_headshot_upload.html', {'uploaded_file_url' : fs.url(file_name)})
+        return render(request, 'users/user_headshot_upload.html', {'uploaded_file_url': fs.url(file_name)})
 
-def upload_dealer_doc(request):
-    pass
+def get_my_dealers(request):
+    class Dealer_Info_Table(tables.Table):
+        class Meta:
+            model = Dealer_Info
+
+    if request.method == "GET":
+        username = str(request.user)
+        dealer_objs = Dealer_Info.objects.filter(managed_by=username)
+        table = Dealer_Info_Table(dealer_objs)
+        return render(request, 'users/dealers_under_user.html', {'table': table})
+    elif request.method == "POST":
+        return HttpResponseBadRequest()
+    
+
+def upload_dealer_docs(request):
+    if request.method == "POST":
+
+        fs = FileSystemStorage()
+        dealer_code = request.POST.dict()['dealer_code']
+        aadhar_card = request.FILES['aadhar_card']
+        pan_card = request.FILES['pan_card']
+
+        # save both the files correctly
+        file_name_aadhar_card = './dealers/' + dealer_code + '/' + aadhar_card.name
+        file_name_pan_card = './dealers/' + dealer_code + '/' + pan_card.name
+
+        if fs.exists(file_name_aadhar_card):
+            fs.delete(file_name_aadhar_card)
+        f1 = fs.save(file_name_aadhar_card, aadhar_card)
+
+        if fs.exists(file_name_pan_card):
+            fs.delete(file_name_pan_card)
+        f2 = fs.save(file_name_pan_card, pan_card)
+
+        return render(request, 'users/dashboard.html')
+
+    elif request.method == "GET":
+        unique_code = request.GET.dict()['unique_code']
+        dealer_obj = None
+        try:
+            dealer_obj = Dealer_Info.objects.get(unique_code=unique_code)
+        except Exception as e:
+            print(e)
+            return HttpResponseServerError()
+        if dealer_obj is not None:
+            return render(request, 'users/add_dealer_docs.html', {'dealer': dealer_obj})
+        else:
+            return HttpResponseServerError()
