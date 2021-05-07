@@ -15,7 +15,7 @@
     <br>
 
     {% if table_type == 'users'%}
-        <form method="get" action= {% url 'assign_user_details' %}>
+        <form method="get" action= {% url 'modify_user_details' %}>
             <lable for="username"> Username: </lable> <input type="text" id="username" name="username">
             <input type="submit" value="Update">
         </form>
