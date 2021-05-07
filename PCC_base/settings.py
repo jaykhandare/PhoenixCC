@@ -61,12 +61,7 @@ ROOT_URLCONF = 'PCC_base.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            # templates for management app
-            'management/templates/',
-            # templates for users app
-            'users/templates/',
-        ],
+        'DIRS': [os.path.join(BASE_DIR,'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
