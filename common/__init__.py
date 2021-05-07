@@ -1,7 +1,5 @@
 # common/__init__.py
 
-from django.db import reset_queries
-from django.http import response
 from django.shortcuts import render
 
 INTERNAL_ERROR_TEMPLATE = "internal_error.html"
