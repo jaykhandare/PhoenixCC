@@ -2,6 +2,7 @@
 
 from django.shortcuts import redirect, render
 from django.core.files.storage import FileSystemStorage
+from django.contrib.auth.decorators import login_required
 import django_tables2 as tables
 from random import randint
 from datetime import date
@@ -51,7 +52,7 @@ def register(request):
 
     return res
 
-
+@login_required
 def add_dealer(request):
     res = create_exception(
         request, __name__, exception="unknown request method")
@@ -74,26 +75,31 @@ def add_dealer(request):
     return res
 
 
+@login_required
 def upload_user_headshot(request):
     res = create_exception(
         request, __name__, exception="unknown request method")
     fs = FileSystemStorage()
-    if request.method == "POST" and request.FILES['profile_picture']:
-        file = request.FILES['profile_picture']
-        file_name = './users/' + \
-            str(request.user) + '.' + file.name.split('.')[-1]
+    if request.method == "POST": 
+        if request.FILES['profile_picture']:
+            file = request.FILES['profile_picture']
+            file_name = './users/' + \
+                str(request.user) + '.' + file.name.split('.')[-1]
 
-        if fs.exists(file_name):
-            fs.delete(file_name)
+            if fs.exists(file_name):
+                fs.delete(file_name)
 
-        try:
-            filename = fs.save(file_name, file)
-        except Exception as e:
-            print(e)
-            res = create_exception(request, __name__, exception=e)
+            try:
+                filename = fs.save(file_name, file)
+            except Exception as e:
+                print(e)
+                res = create_exception(request, __name__, exception=e)
+            else:
+                res = render(request, 'users/user_headshot_upload.html',
+                            {'uploaded_file_url': fs.url(filename)})
         else:
-            res = render(request, 'users/user_headshot_upload.html',
-                         {'uploaded_file_url': fs.url(filename)})
+            res = create_exception(request, __name__, exception="no file uploaded")
+
     elif request.method == "GET":
         if str(request.user) != "AnonymousUser":
             file_name = './users/' + str(request.user) + '.png'
@@ -108,6 +114,7 @@ def upload_user_headshot(request):
     return res
 
 
+@login_required
 def get_my_dealers(request):
     res = create_exception(
         request, __name__, exception="unknown request method")
@@ -129,6 +136,7 @@ def get_my_dealers(request):
     return res
 
 
+@login_required
 def upload_dealer_docs(request):
     res = create_exception(
         request, __name__, exception="unknown request method")

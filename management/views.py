@@ -2,16 +2,18 @@
 
 from django.shortcuts import render
 from django.contrib.auth.models import User
-import django_tables2 as tables
+from django.contrib.auth.decorators import login_required
 
+import django_tables2 as tables
 from users.models import Personal_Info, Dealer_Info
 from management.forms import DealerDataUpdateForm, DealerUniqueCodeUpdateForm, UserDataUpdateForm
 from common import create_exception
 
-
+@login_required
 def show_all_users(request):
     return show_tables(request=request, table_name='users')
 
+@login_required
 def show_all_dealers(request):
     return show_tables(request=request, table_name='dealers')
 
@@ -42,6 +44,7 @@ def show_tables(request, table_name=None):
 
     return res
 
+@login_required
 def modify_dealer_details(request):
     res = create_exception(request, __name__, exception="unknown request method")
 
@@ -87,6 +90,8 @@ def modify_dealer_details(request):
 
     return res
 
+
+@login_required
 def modify_user_details(request):
     res = create_exception(
         request, __name__, exception="unknown request method")
@@ -135,6 +140,8 @@ def modify_user_details(request):
 
     return res
 
+
+@login_required
 def assign_unique_code(request):
     res = create_exception(
         request, __name__, exception="unknown request method")
