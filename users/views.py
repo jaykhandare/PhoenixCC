@@ -46,7 +46,8 @@ def register(request):
             res = create_exception(request, __name__, str(
                 ValueError("form data in request not valid")))
     elif request.method == "GET":
-        res = render(request, "users/register.html", {"form": UserForm})
+        empty_form = UserForm()
+        res = render(request, "users/register.html", {"form": empty_form, "helper": empty_form.get_helper()})
 
     return res
 
@@ -66,8 +67,9 @@ def add_dealer(request):
         else:
             res = redirect('dashboard')
     elif request.method == "GET":
+        empty_form = DealerInfoForm(username=request.user)
         res = render(request, "users/add_dealer.html",
-                     {"form": DealerInfoForm(username=request.user)})
+                     {"form": empty_form, "helper": empty_form.get_helper()})
 
     return res
 

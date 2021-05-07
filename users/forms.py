@@ -3,6 +3,8 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
+from crispy_forms.layout import Submit
+from common import get_helper
 
 from users.models import Dealer_Info
 
@@ -19,6 +21,16 @@ class UserForm(UserCreationForm):
         fields = ('first_name', 'last_name', 'email', 'password1', 'password2',
                   'date_of_birth', 'pin_code', 'address', 'city')
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = get_helper()
+        self.helper.form_id = 'id-registerForm'
+        self.helper.add_input(Submit('submit', 'Submit'))
+
+    def get_helper(self):
+        return self.helper
+
+
 class DealerInfoForm(forms.ModelForm):
     class Meta:
         model = Dealer_Info
@@ -29,3 +41,10 @@ class DealerInfoForm(forms.ModelForm):
         self.fields['managed_by'].initial = username
         self.fields['unique_code'].initial = "NOT_ASSIGNED"
         self.fields['unique_code'].disabled = True
+
+        self.helper = get_helper()
+        self.helper.form_id = 'id-registerForm'
+        self.helper.add_input(Submit('submit', 'Submit'))
+
+    def get_helper(self):
+        return self.helper

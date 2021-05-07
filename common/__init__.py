@@ -1,6 +1,8 @@
 # common/__init__.py
 
 from django.shortcuts import render
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Submit
 
 INTERNAL_ERROR_TEMPLATE = "internal_error.html"
 
@@ -45,3 +47,12 @@ def create_exception(request, function_name, exception, template=INTERNAL_ERROR_
     exception_reply = {'exception' : response_string}
 
     return render(request, template, exception_reply)
+
+def get_helper():
+    helper = FormHelper()
+    helper.form_class = 'form-horizontal'
+    helper.form_method = 'post'
+    helper.form_action = 'submit_survey'
+    helper.label_class = 'col-lg-2'
+    helper.field_class = 'col-lg-8'
+    return helper
