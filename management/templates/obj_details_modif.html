@@ -1,0 +1,24 @@
+<!--management/templates/obj_details_modif.html-->
+
+{% extends 'base.html' %}
+
+{% block content %}
+    {% if form_type == 'user' %}
+        <h2>Users details</h2>
+    {% else %}
+        <h2>Dealers details</h2>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        {{form}}
+        <input type="submit" value="Update">
+    </form>
+
+    {% if form_type == 'user' %}
+        <a href="{% url 'show_all_users' %}">Back</a>
+    {% else %}
+        <a href="{% url 'show_all_dealers' %}">Back</a>
+    {% endif %}
+
+{% endblock %}

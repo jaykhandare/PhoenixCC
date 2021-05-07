@@ -44,8 +44,6 @@ def create_exception(request, function_name, exception, template=INTERNAL_ERROR_
     response_string = "problem in {} : {} ".format(function_name, exception)
     if additional_data is not None:
         response_string += " => for value : {}".format(additional_data)
-    
     exception_reply = {'exception' : response_string}
-    if additional_data is not None: exception_reply['exception'] + " for value: {}".format(additional_data)
-    print(additional_data)
+
     return render(request, template, exception_reply)

@@ -1,0 +1,35 @@
+<!--management/templates/show_table.html-->
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+    {% if table_type == 'users'%}
+        <h2>Users details</h2>
+    {% else %}
+        <h2>Dealers details</h2>
+    {% endif %}
+
+    {% load render_table from django_tables2%}
+    {% render_table table %}
+    <br>
+
+    {% if table_type == 'users'%}
+        <form method="get" action= {% url 'assign_user_details' %}>
+            <lable for="username"> Username: </lable> <input type="text" id="username" name="username">
+            <input type="submit" value="Update">
+        </form>
+    {% else %}
+        <p> Update dealer info </p>
+        <form method="get" action= {% url 'modify_dealer_details' %}>
+            <lable for="unique_code"> Dealer unique_code: </lable> <input type="text" id="unique_code" name="unique_code"> <input type="submit" value="Update">
+        </form>
+        <br>
+        <p> Update dealer unique_code </p>
+        <form method="get" action= {% url 'assign_unique_code' %}>
+            <lable for="unique_code"> Dealer unique_code: </lable> <input type="text" id="unique_code" name="unique_code"> <input type="submit" value="Update">
+        </form>
+
+    {% endif %}
+
+{% endblock %}

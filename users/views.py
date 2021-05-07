@@ -1,23 +1,24 @@
 # users/views.py
 
-from django.http.response import HttpResponseBadRequest, HttpResponseServerError
 from django.shortcuts import redirect, render
 from django.core.files.storage import FileSystemStorage
-
+import django_tables2 as tables
 from random import randint
 from datetime import date
 
-import django_tables2 as tables
 from users.forms import UserForm, DealerInfoForm
 from users.models import Dealer_Info, Personal_Info
 from common import create_exception
 
+
 def dashboard(request):
     return render(request, "users/dashboard.html")
 
+
 def register(request):
-    res = create_exception(request, __name__, exception="unknown request method")
-    
+    res = create_exception(
+        request, __name__, exception="unknown request method")
+
     if request.method == "POST":
         form = UserForm(request.POST)
         if form.is_valid():
@@ -25,7 +26,8 @@ def register(request):
             user_obj.first_name = user_obj.first_name.capitalize()
             user_obj.last_name = user_obj.last_name.capitalize()
 
-            username = user_obj.first_name.lower()[0] + user_obj.last_name.lower() + str(randint(1, 10000))
+            username = user_obj.first_name.lower(
+            )[0] + user_obj.last_name.lower() + str(randint(1, 10000))
             user_obj.username = username
             user_details_obj = Personal_Info(username=username, date_of_birth=form.cleaned_data['date_of_birth'],
                                              pin_code=form.cleaned_data['pin_code'], address=form.cleaned_data['address'],
@@ -41,14 +43,17 @@ def register(request):
             else:
                 res = redirect('dashboard')
         else:
-            res = create_exception(request, __name__, str(ValueError("form data in request not valid")))
+            res = create_exception(request, __name__, str(
+                ValueError("form data in request not valid")))
     elif request.method == "GET":
         res = render(request, "users/register.html", {"form": UserForm})
 
     return res
 
+
 def add_dealer(request):
-    res = create_exception(request, __name__, exception="unknown request method")
+    res = create_exception(
+        request, __name__, exception="unknown request method")
     if request.method == "POST":
         data = request.POST.dict()
         dealer_obj = Dealer_Info(first_name=data['first_name'], last_name=data['last_name'], pin_code=data['pin_code'], address=data['address'], city=data['city'],
@@ -61,16 +66,20 @@ def add_dealer(request):
         else:
             res = redirect('dashboard')
     elif request.method == "GET":
-        res = render(request, "users/add_dealer.html", {"form": DealerInfoForm(username=request.user)})
+        res = render(request, "users/add_dealer.html",
+                     {"form": DealerInfoForm(username=request.user)})
 
     return res
 
+
 def upload_user_headshot(request):
-    res = create_exception(request, __name__, exception="unknown request method")
+    res = create_exception(
+        request, __name__, exception="unknown request method")
     fs = FileSystemStorage()
     if request.method == "POST" and request.FILES['profile_picture']:
         file = request.FILES['profile_picture']
-        file_name = './users/' + str(request.user) + '.' + file.name.split('.')[-1]
+        file_name = './users/' + \
+            str(request.user) + '.' + file.name.split('.')[-1]
 
         if fs.exists(file_name):
             fs.delete(file_name)
@@ -81,20 +90,26 @@ def upload_user_headshot(request):
             print(e)
             res = create_exception(request, __name__, exception=e)
         else:
-            res = render(request, 'users/user_headshot_upload.html', {'uploaded_file_url': fs.url(filename)})
+            res = render(request, 'users/user_headshot_upload.html',
+                         {'uploaded_file_url': fs.url(filename)})
     elif request.method == "GET":
         if str(request.user) != "AnonymousUser":
             file_name = './users/' + str(request.user) + '.png'
             if fs.exists(file_name):
-                res = render(request, 'users/user_headshot_upload.html', {'uploaded_file_url': fs.url(file_name)})
+                res = render(request, 'users/user_headshot_upload.html',
+                             {'uploaded_file_url': fs.url(file_name)})
         # user is AnonymousUser or doesn't have profilePic
         file_name = './users/profilePic.png'
-        res = render(request, 'users/user_headshot_upload.html', {'uploaded_file_url': fs.url(file_name)})
+        res = render(request, 'users/user_headshot_upload.html',
+                     {'uploaded_file_url': fs.url(file_name)})
 
     return res
 
+
 def get_my_dealers(request):
-    res = create_exception(request, __name__, exception="unknown request method")
+    res = create_exception(
+        request, __name__, exception="unknown request method")
+
     class Dealer_Info_Table(tables.Table):
         class Meta:
             model = Dealer_Info
@@ -103,23 +118,27 @@ def get_my_dealers(request):
         username = str(request.user)
         dealer_objs = Dealer_Info.objects.filter(managed_by=username)
         table = Dealer_Info_Table(dealer_objs)
-        res = render(request, 'users/dealers_under_user.html', {'table': table})
+        res = render(request, 'users/dealers_under_user.html',
+                     {'table': table})
     elif request.method == "POST":
-        res = create_exception(request, __name__, exception="POST method not implemented")
+        res = create_exception(
+            request, __name__, exception="POST method not implemented")
 
     return res
 
+
 def upload_dealer_docs(request):
-    res = create_exception(request, __name__, exception="unknown request method")
+    res = create_exception(
+        request, __name__, exception="unknown request method")
     if request.method == "POST":
         fs = FileSystemStorage()
-        dealer_code = request.POST.dict()['dealer_code']
+        unique_code = request.POST.dict()['unique_code']
         aadhar_card = request.FILES['aadhar_card']
         pan_card = request.FILES['pan_card']
 
         # save both the files correctly
-        file_name_aadhar_card = './dealers/' + dealer_code + '/' + aadhar_card.name
-        file_name_pan_card = './dealers/' + dealer_code + '/' + pan_card.name
+        file_name_aadhar_card = './dealers/' + unique_code + '/' + aadhar_card.name
+        file_name_pan_card = './dealers/' + unique_code + '/' + pan_card.name
 
         if fs.exists(file_name_aadhar_card):
             fs.delete(file_name_aadhar_card)
@@ -140,8 +159,10 @@ def upload_dealer_docs(request):
             print(e)
             res = create_exception(request, __name__, exception=e)
         if dealer_obj is not None:
-            res = render(request, 'users/add_dealer_docs.html', {'dealer': dealer_obj})
+            res = render(request, 'users/add_dealer_docs.html',
+                         {'dealer': dealer_obj})
         else:
-            res = create_exception(request, __name__, exception="dealer with unique_code({}) not found".format(unique_code))
+            res = create_exception(
+                request, __name__, exception="dealer with unique_code({}) not found".format(unique_code))
 
     return res
