@@ -3,9 +3,9 @@
 from django.shortcuts import redirect, render
 from django.core.files.storage import FileSystemStorage
 from django.contrib.auth.decorators import login_required
-import django_tables2 as tables
 from random import randint
 from datetime import date
+import django_tables2 as tables
 
 from users.forms import UserForm, DealerInfoForm
 from users.models import Dealer_Info, Personal_Info
